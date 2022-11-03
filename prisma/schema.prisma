@@ -1,8 +1,99 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
 datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
-generator client {
-  provider = "prisma-client-js"
+model categoria {
+  idCategoria  Int          @id @default(autoincrement())
+  Nombre       String       @db.VarChar(255)
+  subcategoria subcategoria @relation(fields: [idCategoria], references: [idCategoria], onDelete: Cascade, map: "categoria_ibfk_1")
+}
+
+model ciudad {
+  idCiudad        Int           @id @default(autoincrement())
+  Nombre          Int
+  id_Departamento Int           @unique(map: "id_Departamento")
+  usuario         usuario       @relation(fields: [idCiudad], references: [id_ciudad], onDelete: Cascade, map: "ciudad_ibfk_1")
+  departamento    departamento?
+}
+
+model compra {
+  idCompra     Int           @id @default(autoincrement())
+  Subtotal     Float
+  Total        Float
+  id_estado    Int           @unique(map: "id_estado")
+  estadocompra estadocompra?
+  itemcompra   itemcompra?
+}
+
+model departamento {
+  idDepartamento Int    @id @default(autoincrement())
+  Nombre         String @db.VarChar(255)
+  ciudad         ciudad @relation(fields: [idDepartamento], references: [id_Departamento], onDelete: Cascade, map: "departamento_ibfk_1")
+}
+
+model estadocompra {
+  IdEstado Int    @id @default(autoincrement())
+  Estado   Int    @db.TinyInt
+  compra   compra @relation(fields: [IdEstado], references: [id_estado], onDelete: Cascade, map: "estadocompra_ibfk_1")
+}
+
+model imagenes {
+  idImagen    Int      @id @default(autoincrement()) @db.UnsignedInt
+  url         Int
+  id_producto Int      @unique(map: "id_producto")
+  producto    producto @relation(fields: [id_producto], references: [idProducto], onDelete: Cascade, map: "imagenes_ibfk_1")
+}
+
+model itemcompra {
+  idItem      Int       @id @default(autoincrement())
+  id_producto Int       @unique(map: "id_producto")
+  id_compra   Int       @unique(map: "id_compra")
+  compra      compra    @relation(fields: [id_compra], references: [idCompra], onDelete: Cascade, map: "itemcompra_ibfk_1")
+  producto    producto?
+}
+
+model marca {
+  idMarca  Int       @id @default(autoincrement())
+  Nombre   String    @db.VarChar(255)
+  producto producto?
+}
+
+model producto {
+  idProducto      Int          @id @default(autoincrement())
+  Nombre          String       @db.VarChar(255)
+  Precio          Float
+  Cantidad        Int
+  id_marca        Int          @unique(map: "id_marca")
+  id_subcategoria Int          @unique(map: "id_subcategoria")
+  marca           marca        @relation(fields: [id_marca], references: [idMarca], onDelete: Cascade, map: "producto_ibfk_1")
+  subcategoria    subcategoria @relation(fields: [id_subcategoria], references: [idSubcategoria], onDelete: Cascade, map: "producto_ibfk_2")
+  itemcompra      itemcompra   @relation(fields: [idProducto], references: [id_producto], onDelete: Cascade, map: "producto_ibfk_3")
+  imagenes        imagenes?
+}
+
+model subcategoria {
+  idSubcategoria Int        @id @default(autoincrement())
+  Nombre         String     @db.VarChar(255)
+  idCategoria    Int        @unique(map: "idCategoria")
+  categoria      categoria?
+  producto       producto?
+}
+
+model usuario {
+  idUsuario Int      @id @default(autoincrement())
+  Nombre    String   @db.VarChar(50)
+  Apellido  String   @db.VarChar(50)
+  Cedula    String   @db.VarChar(10)
+  Cel       String   @db.VarChar(10)
+  Email     String   @unique(map: "email") @db.VarChar(50)
+  Contra    String   @db.VarChar(100)
+  Direccion String   @db.VarChar(60)
+  Fecha_nac DateTime @default(now()) @db.Timestamp(0)
+  id_ciudad Int      @unique(map: "id_ciudad")
+  ciudad    ciudad?
 }
