@@ -8,59 +8,76 @@ datasource db {
 }
 
 model categoria {
-  idCategoria  Int          @id @default(autoincrement())
-  Nombre       String       @db.VarChar(255)
-  subcategoria subcategoria @relation(fields: [idCategoria], references: [idCategoria], onDelete: Cascade, map: "categoria_ibfk_1")
+  idCategoria  Int            @id @default(autoincrement())
+  Nombre       String         @db.VarChar(255)
+  subcategoria subcategoria[]
 }
 
 model ciudad {
-  idCiudad        Int           @id @default(autoincrement())
-  Nombre          Int
-  id_Departamento Int           @unique(map: "id_Departamento")
-  usuario         usuario       @relation(fields: [idCiudad], references: [id_ciudad], onDelete: Cascade, map: "ciudad_ibfk_1")
-  departamento    departamento?
+  idCiudad        Int          @id
+  Nombre          String       @db.VarChar(100)
+  id_Departamento Int
+  createdAt       DateTime?    @db.DateTime(0)
+  updatedAt       DateTime?    @db.DateTime(0)
+  departamento    departamento @relation(fields: [id_Departamento], references: [idDepartamento], map: "ciudad_ibfk_1")
+  usuario         usuario[]
+
+  @@index([id_Departamento], map: "id_Departamento")
 }
 
 model compra {
-  idCompra     Int           @id @default(autoincrement())
+  idCompra     Int          @id @default(autoincrement())
   Subtotal     Float
   Total        Float
-  id_estado    Int           @unique(map: "id_estado")
-  estadocompra estadocompra?
-  itemcompra   itemcompra?
+  id_estado    Int
+  id_usuario   Int
+  usuario      usuario      @relation(fields: [id_usuario], references: [idUsuario], onDelete: Cascade, map: "compra_ibfk_1")
+  estadocompra estadocompra @relation(fields: [id_estado], references: [IdEstado], onDelete: Cascade, map: "compra_ibfk_2")
+  itemcompra   itemcompra[]
+
+  @@index([id_estado], map: "id_estado")
+  @@index([id_usuario], map: "id_user")
 }
 
 model departamento {
-  idDepartamento Int    @id @default(autoincrement())
-  Nombre         String @db.VarChar(255)
-  ciudad         ciudad @relation(fields: [idDepartamento], references: [id_Departamento], onDelete: Cascade, map: "departamento_ibfk_1")
+  idDepartamento Int      @id
+  Nombre         String   @db.VarChar(255)
+  createdAt      DateTime @db.DateTime(0)
+  updatedAt      DateTime @db.DateTime(0)
+  ciudad         ciudad[]
 }
 
 model estadocompra {
-  IdEstado Int    @id @default(autoincrement())
-  Estado   Int    @db.TinyInt
-  compra   compra @relation(fields: [IdEstado], references: [id_estado], onDelete: Cascade, map: "estadocompra_ibfk_1")
+  IdEstado Int      @id @default(autoincrement())
+  Estado   Int      @db.TinyInt
+  compra   compra[]
 }
 
 model imagenes {
   idImagen    Int      @id @default(autoincrement()) @db.UnsignedInt
-  url         Int
-  id_producto Int      @unique(map: "id_producto")
+  url         String   @db.VarChar(100)
+  id_producto Int
   producto    producto @relation(fields: [id_producto], references: [idProducto], onDelete: Cascade, map: "imagenes_ibfk_1")
+
+  @@index([id_producto], map: "id_producto")
 }
 
 model itemcompra {
-  idItem      Int       @id @default(autoincrement())
-  id_producto Int       @unique(map: "id_producto")
-  id_compra   Int       @unique(map: "id_compra")
-  compra      compra    @relation(fields: [id_compra], references: [idCompra], onDelete: Cascade, map: "itemcompra_ibfk_1")
-  producto    producto?
+  idItem      Int      @id @default(autoincrement())
+  id_producto Int
+  id_compra   Int
+  cantidad    Int
+  compra      compra   @relation(fields: [id_compra], references: [idCompra], onDelete: Cascade, map: "itemcompra_ibfk_1")
+  producto    producto @relation(fields: [id_producto], references: [idProducto], onDelete: Cascade, map: "itemcompra_ibfk_2")
+
+  @@index([id_producto], map: "id_producto")
+  @@index([id_compra], map: "id_compra")
 }
 
 model marca {
-  idMarca  Int       @id @default(autoincrement())
-  Nombre   String    @db.VarChar(255)
-  producto producto?
+  idMarca  Int        @id @default(autoincrement())
+  Nombre   String     @db.VarChar(255)
+  producto producto[]
 }
 
 model producto {
@@ -68,20 +85,25 @@ model producto {
   Nombre          String       @db.VarChar(255)
   Precio          Float
   Cantidad        Int
-  id_marca        Int          @unique(map: "id_marca")
-  id_subcategoria Int          @unique(map: "id_subcategoria")
+  id_marca        Int
+  id_subcategoria Int
   marca           marca        @relation(fields: [id_marca], references: [idMarca], onDelete: Cascade, map: "producto_ibfk_1")
   subcategoria    subcategoria @relation(fields: [id_subcategoria], references: [idSubcategoria], onDelete: Cascade, map: "producto_ibfk_2")
-  itemcompra      itemcompra   @relation(fields: [idProducto], references: [id_producto], onDelete: Cascade, map: "producto_ibfk_3")
-  imagenes        imagenes?
+  imagenes        imagenes[]
+  itemcompra      itemcompra[]
+
+  @@index([id_marca], map: "id_marca")
+  @@index([id_subcategoria], map: "id_subcategoria")
 }
 
 model subcategoria {
   idSubcategoria Int        @id @default(autoincrement())
   Nombre         String     @db.VarChar(255)
-  idCategoria    Int        @unique(map: "idCategoria")
-  categoria      categoria?
-  producto       producto?
+  idCategoria    Int
+  categoria      categoria  @relation(fields: [idCategoria], references: [idCategoria], onDelete: Cascade, map: "subcategoria_ibfk_1")
+  producto       producto[]
+
+  @@index([idCategoria], map: "idCategoria")
 }
 
 model usuario {
@@ -94,6 +116,9 @@ model usuario {
   Contra    String   @db.VarChar(100)
   Direccion String   @db.VarChar(60)
   Fecha_nac DateTime @default(now()) @db.Timestamp(0)
-  id_ciudad Int      @unique(map: "id_ciudad")
-  ciudad    ciudad?
+  id_ciudad Int
+  ciudad    ciudad   @relation(fields: [id_ciudad], references: [idCiudad], onDelete: Cascade, map: "usuario_ibfk_1")
+  compra    compra[]
+
+  @@index([id_ciudad], map: "id_ciudad")
 }
