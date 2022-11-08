@@ -31,12 +31,16 @@ model compra {
   Total        Float
   id_estado    Int
   id_usuario   Int
+  id_Codesc    Int
   usuario      usuario      @relation(fields: [id_usuario], references: [idUsuario], onDelete: Cascade, map: "compra_ibfk_1")
   estadocompra estadocompra @relation(fields: [id_estado], references: [IdEstado], onDelete: Cascade, map: "compra_ibfk_2")
+  codigosdesc  codigosdesc  @relation(fields: [id_Codesc], references: [IdCod], onDelete: Cascade, map: "compra_ibfk_3")
   itemcompra   itemcompra[]
 
   @@index([id_estado], map: "id_estado")
   @@index([id_usuario], map: "id_user")
+  @@index([idCompra], map: "idCompra")
+  @@index([id_Codesc], map: "id_Codesc")
 }
 
 model departamento {
@@ -121,4 +125,11 @@ model usuario {
   compra    compra[]
 
   @@index([id_ciudad], map: "id_ciudad")
+}
+
+model codigosdesc {
+  IdCod     Int      @id @default(autoincrement())
+  Codigo    String   @db.VarChar(10)
+  Descuento Int
+  compra    compra[]
 }

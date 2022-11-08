@@ -22,14 +22,25 @@ export class ProductController {
   }
 
   @Get('product/:id')
-  async getProductById(@Param('id') id: string): Promise<ProductModel> {
+  async getProductById(
+    @Param('id') id: string): Promise<ProductModel> {
     return this.ProductService.produc({ idProducto: Number(id) });
   }
 
-  // @Post('produict/create')
-  // async createProduct (
-  //   @Body() productData:{nombre:string, precio:number, cantidad:number, id_marca:number, id_subcategoria:number}
-  // ):Promise<ProductModel>{
-  //   return this.ProductService.createProduc(productData);
-  // }
+  @Post('product/create')
+  async createProduct (
+    @Body() productData:{Nombre:string, Precio:number, Cantidad:number, marca:number, subcategoria:number}
+  ):Promise<ProductModel>{
+    return this.ProductService.createProduc(productData);
+  }
+
+  @Put('product/update/:id')
+  async updateProduct(
+    @Body() productData:{Nombre:string, Precio:number, Cantidad:number, marca:number, subcategoria:number},
+    @Param('id') id:string):Promise<ProductModel>{
+    return this.ProductService.updateProduct({
+      data: productData,
+      where: { idProducto: Number(id) },
+    })
+  }
 }
