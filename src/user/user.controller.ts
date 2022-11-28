@@ -30,9 +30,9 @@ async getUserById(
 
 @Post('user/create')
 async createUser (
-  @Body() productData:CreateUserDto
-):Promise<UserModel>{
-  return this.UserService.createUser(productData);
+  @Body() productData:CreateUserDto,
+):Promise<any>{
+  return await this.UserService.createUser(productData);
 }
 
 @Put('user/update/:id')

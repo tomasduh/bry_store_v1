@@ -31,8 +31,8 @@ export class UserService {
     });
   }
 
-  async createUser(data: CreateUserDto): Promise<usuario> {
-    return this.prisma.usuario.create({
+  async createUser(data: CreateUserDto): Promise<CreateUserDto> {
+    return  await this.prisma.usuario.create({
       data,
     });
   }
